@@ -1,6 +1,6 @@
 import React from 'react'
 import { Image, View, TouchableOpacity, Text, TextInput, Alert } from 'react-native'
-import styles from '../../styles/style';
+import styles from '../../styles/login-style';
 import apiController from '../../controllers/api-controller';
 import { connect } from 'react-redux';
 import { addPlace, addUser } from '../../redux/actions/user';

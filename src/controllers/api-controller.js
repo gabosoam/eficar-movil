@@ -5,7 +5,7 @@ const urlApi = 'http://192.168.0.106:1337/';
 export default {
     get: (url) => {
         console.log(urlApi + url)
-        return fetch(urlApi + url);
+        return fetch(urlApi + url, );
     },
 
     post: async (url, body) => {
