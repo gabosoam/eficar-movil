@@ -1,5 +1,5 @@
 import React from 'react'
-import { Image, View, TouchableOpacity, Text, TextInput, Alert } from 'react-native'
+import { Image, View, TouchableOpacity, Text, TextInput, Alert, StatusBar } from 'react-native'
 import styles from '../../styles/login-style';
 import apiController from '../../controllers/api-controller';
 import { connect } from 'react-redux';
@@ -57,7 +57,9 @@ class LoginPage extends React.Component {
 
     render() {
         return (
-            <View>
+            
+             <View>
+                <StatusBar backgroundColor='#2E4055' barStyle="light-content"></StatusBar>
                 <View style={styles.logoContainer}>
                     <Image
                         style={styles.logo}
@@ -92,7 +94,7 @@ class LoginPage extends React.Component {
                 <TouchableOpacity style={styles.buttonContainer} onPress={() => this.onLogin()}>
                     <Text style={styles.textButton}>{'Continuar'}</Text>
                 </TouchableOpacity>
-            </View>
+            </View> 
 
 
         )

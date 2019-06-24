@@ -1,30 +1,43 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { addPlace } from '../../redux/actions/place';
-import { TouchableHighlight, Image, View, FlatList, Text } from 'react-native'
+import { TouchableHighlight, Image, View, FlatList, SectionList, Text } from 'react-native'
 import styles from '../../styles/main-style'
 import { ListItem, Header, Button, Badge } from 'react-native-elements'
 import { createBottomTabNavigator, createAppContainer, createStackNavigator } from 'react-navigation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import apiController from '../../controllers/api-controller';
 import ItemDetail from './item-detail';
-
+import moment from "moment";
+import { widthPercentageToDP, heightPercentageToDP } from 'react-native-responsive-screen';
+import ItemProduction from './item-production';
 
 
 class MainPage extends Component {
 
-  static navigationOptions = {
-    title: 'Lista de tareas',
 
-  };
 
   constructor(props) {
     super(props)
     this.state = {
-      data: []
+      data: [],
+      isFetching: false,
     }
 
     this.getData();
+  }
+
+  onRefresh() {
+    this.setState({ isFetching: true }, function() { this.getData() });
+ }
+
+
+  renderEmplyItem= ()=>{
+    return(
+      <View style={{alignItems: 'center'}}>
+        <Text>No tienes tareas en esta sección</Text>
+      </View>
+    )
   }
 
 
@@ -32,8 +45,10 @@ class MainPage extends Component {
     apiController.get('asignacion/vistalist?usuario=' + this.props.user.user.persona.id)
       .then((response) => response.json())
       .then((responseJson) => {
+        console.log(responseJson)
         this.setState({
-          data: responseJson
+          data: responseJson,
+          isFetching: false
         })
       })
       .catch((error) => {
@@ -51,63 +66,61 @@ class MainPage extends Component {
     places: []
   }
 
-  getState = (state) => {
-    switch (state) {
-        case 1:
-            return 'En espera'
-            break;
-        case 2:
-            return 'En Producción'
-            break;
-        case 3:
-            return 'En Pausa'
-            break;
-        case 4:
-            return 'Finalizado'
-            break;
-        default:
-            break;
-    }
-}
-
-getColor = (state) => {
-  switch (state) {
-      case 1:
-          return 'error'
-          break;
-      case 2:
-          return 'primary'
-          break;
-      case 3:
-          return 'warning'
-          break;
-      case 4:
-          return 'success'
-          break;
-      default:
-          break;
-  }
-}
 
 
-  renderItem = ({ item, index }) => {
+
+
+  renderItem = (item, index) => {
+
     return (
       <ListItem
-      containerStyle={styles.itemContainer}
         key={index}
+
+        bottomDivider={true}
         title={item.producto}
         titleProps={{ numberOfLines: 1 }}
-        titleStyle={styles.title}
-        subtitleStyle={styles.subTitle}
-       
-        badge={{status: this.getColor(item.estado), value: this.getState(item.estado), textStyle: {fontSize: 12}}}
-        rightTitleStyle={styles.subTitle}
-        subtitle={item.producto}
+        subtitle={ moment(Date(item.hora_inicio)).fromNow()    }
+      
         chevron={true}
-        onPress={() => this.props.navigation.navigate('Details', { ...item })}
+        onPress={() => this.goToPage(item.estado, item)}
       />
     )
   }
+
+  goToPage(estado, item){
+    switch (estado) {
+      case 1:
+        this.props.navigation.navigate('Details', { ...item })
+        break;
+        case 2:
+          this.props.navigation.navigate('Production', { ...item })
+          break;
+      default:
+        break;
+    }
+  }
+
+
+  renderSection = (title) => {
+
+    return (
+      <View style={{ backgroundColor: '#FF4858' }}>
+        <Text style={{ fontWeight: 'bold', fontFamily: 'Roboto', textAlign: 'center', color: 'white', fontSize: 20 }}>{title}</Text>
+      </View>
+
+    )
+  }
+
+  renderNoContent = (section) => {
+    if(section.data.length == 0){
+       return(
+         <View style={{alignItems:'center', paddingVertical: heightPercentageToDP('2')}}>
+           <Text>No hay tareas en esta sección</Text>
+         </View>
+       )
+    }
+    return null
+ }
 
 
 
@@ -115,14 +128,21 @@ getColor = (state) => {
     return (
       <View>
 
-
-
-
         <View style={styles.listContainer}>
 
-          <FlatList
-            renderItem={(item, index) => this.renderItem(item, index)}
-            data={this.state.data.filter(item=> item.estado==1 || item.estado==2)}
+          <SectionList
+            extraData={this.state}
+            onRefresh={() => this.onRefresh()}
+            refreshing={this.state.isFetching}
+            renderItem={({ item, index, section }) => this.renderItem(item, index)}
+            renderSectionFooter={({section}) => this.renderNoContent(section)}
+            renderSectionHeader={({ section: { title } }) => this.renderSection(title)}
+            sections={[
+              { title: 'En espera de producción', data: data = this.state.data.filter(item => item.estado == 1) },
+              { title: 'En producción', data: this.state.data.filter(item => item.estado == 2) },
+              { title: 'En pausa', data: this.state.data.filter(item => item.estado == 3) },
+            ]}
+            keyExtractor={(item, index) => item + index}
           />
 
         </View>
@@ -165,6 +185,7 @@ class SettingsScreen extends React.Component {
 const HomeStack = createStackNavigator({
   Home: connect(mapStateToProps, mapDispatchToProps)(MainPage),
   Details: connect(mapStateToProps, mapDispatchToProps)(ItemDetail),
+  Production: connect(mapStateToProps, mapDispatchToProps)(ItemProduction),
 });
 
 const TabNavigator = createBottomTabNavigator({

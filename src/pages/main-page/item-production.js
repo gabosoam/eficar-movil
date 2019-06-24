@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import api from '../../controllers/api-controller'
 import moment from 'moment'
 
-export default class ItemDetail extends React.Component {
+export default class ItemProduction extends React.Component {
 
     constructor(props) {
         super(props)
@@ -57,7 +57,15 @@ export default class ItemDetail extends React.Component {
                     buttonStyle={styles.buttonStyle}
                     containerStyle={styles.containerButton}
                     titleStyle={styles.textButton}
-                    title="Iniciar tarea"
+                    title="Pausar tarea"
+                />
+
+                <Button
+                    onPress={() => this.confirmation(this.props.navigation.state.params.id)}
+                    buttonStyle={styles.buttonStyle}
+                    containerStyle={styles.containerButton}
+                    titleStyle={styles.textButton}
+                    title="Finalizar tarea"
                 />
             </View>
         )
@@ -71,7 +79,7 @@ export default class ItemDetail extends React.Component {
 
         Alert.alert(
             '¿Seguro que deseas iniciar la tarea?',
-            'Tienes '+formatted+' para completar la tarea desde que presionas el botón iniciar',
+            'Tienes ' + formatted + ' para completar la tarea desde que presionas el botón iniciar',
             [
                 {
                     text: 'Cancelar',
