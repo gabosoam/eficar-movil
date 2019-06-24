@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import api from '../../controllers/api-controller'
 import moment from 'moment'
 
-export default class ItemDetail extends React.Component {
+export default class ItemPausa extends React.Component {
 
     constructor(props) {
         super(props)
@@ -57,7 +57,7 @@ export default class ItemDetail extends React.Component {
                     buttonStyle={styles.buttonStyle}
                     containerStyle={styles.containerButton}
                     titleStyle={styles.textButton}
-                    title="Iniciar tarea"
+                    title="Reanudar tarea"
                 />
             </View>
         )
@@ -70,15 +70,15 @@ export default class ItemDetail extends React.Component {
         const formatted = moment.utc(secs * 1000).format('HH:mm:ss');
 
         Alert.alert(
-            '¿Seguro que deseas iniciar la tarea?',
-            'Tienes '+formatted+' para completar la tarea desde que presionas el botón iniciar',
+            '¿Seguro que deseas reinicar la tarea?',
+            'El tiempo transcurrirá al presionar el botón Reanudar',
             [
                 {
                     text: 'Cancelar',
                     onPress: () => console.log('Cancel Pressed'),
                     style: 'cancel',
                 },
-                { text: 'Iniciar', onPress: () => this.iniciarTarea(id, item) },
+                { text: 'Reanudar', onPress: () => this.iniciarTarea(id, item) },
             ],
             { cancelable: true },
         );
@@ -87,7 +87,7 @@ export default class ItemDetail extends React.Component {
     iniciarTarea = (asignacion,item) => {
 
 
-        api.get('asignacion/iniciartarea?asignacion=' + asignacion)
+        api.get('asignacion/reanudartarea?asignacion=' + asignacion+"&pausa="+item.id_pausa)
             .then((response) => response.json())
             .then((responseJson) => {
                 console.log(responseJson)

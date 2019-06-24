@@ -11,6 +11,7 @@ import ItemDetail from './item-detail';
 import moment from "moment";
 import { widthPercentageToDP, heightPercentageToDP } from 'react-native-responsive-screen';
 import ItemProduction from './item-production';
+import ItemPausa from './item-pausa';
 
 
 class MainPage extends Component {
@@ -28,13 +29,13 @@ class MainPage extends Component {
   }
 
   onRefresh() {
-    this.setState({ isFetching: true }, function() { this.getData() });
- }
+    this.setState({ isFetching: true }, function () { this.getData() });
+  }
 
 
-  renderEmplyItem= ()=>{
-    return(
-      <View style={{alignItems: 'center'}}>
+  renderEmplyItem = () => {
+    return (
+      <View style={{ alignItems: 'center' }}>
         <Text>No tienes tareas en esta sección</Text>
       </View>
     )
@@ -79,22 +80,26 @@ class MainPage extends Component {
         bottomDivider={true}
         title={item.producto}
         titleProps={{ numberOfLines: 1 }}
-        subtitle={ moment(Date(item.hora_inicio)).fromNow()    }
-      
+        subtitle={moment(Date(item.hora_inicio)).fromNow()}
+
         chevron={true}
         onPress={() => this.goToPage(item.estado, item)}
       />
     )
   }
 
-  goToPage(estado, item){
+  goToPage(estado, item) {
     switch (estado) {
       case 1:
         this.props.navigation.navigate('Details', { ...item })
         break;
-        case 2:
-          this.props.navigation.navigate('Production', { ...item })
-          break;
+      case 2:
+        this.props.navigation.navigate('Production', { ...item })
+        break;
+
+      case 3:
+        this.props.navigation.navigate('Pausa', { ...item })
+        break;
       default:
         break;
     }
@@ -112,15 +117,15 @@ class MainPage extends Component {
   }
 
   renderNoContent = (section) => {
-    if(section.data.length == 0){
-       return(
-         <View style={{alignItems:'center', paddingVertical: heightPercentageToDP('2')}}>
-           <Text>No hay tareas en esta sección</Text>
-         </View>
-       )
+    if (section.data.length == 0) {
+      return (
+        <View style={{ alignItems: 'center', paddingVertical: heightPercentageToDP('2') }}>
+          <Text>No hay tareas en esta sección</Text>
+        </View>
+      )
     }
     return null
- }
+  }
 
 
 
@@ -135,7 +140,7 @@ class MainPage extends Component {
             onRefresh={() => this.onRefresh()}
             refreshing={this.state.isFetching}
             renderItem={({ item, index, section }) => this.renderItem(item, index)}
-            renderSectionFooter={({section}) => this.renderNoContent(section)}
+            renderSectionFooter={({ section }) => this.renderNoContent(section)}
             renderSectionHeader={({ section: { title } }) => this.renderSection(title)}
             sections={[
               { title: 'En espera de producción', data: data = this.state.data.filter(item => item.estado == 1) },
@@ -186,6 +191,7 @@ const HomeStack = createStackNavigator({
   Home: connect(mapStateToProps, mapDispatchToProps)(MainPage),
   Details: connect(mapStateToProps, mapDispatchToProps)(ItemDetail),
   Production: connect(mapStateToProps, mapDispatchToProps)(ItemProduction),
+  Pausa: connect(mapStateToProps, mapDispatchToProps)(ItemPausa),
 });
 
 const TabNavigator = createBottomTabNavigator({

@@ -3,7 +3,7 @@ import { View, Text, Alert } from 'react-native'
 import { Button } from 'react-native-elements'
 import styles from '../../styles/main-style'
 import Icon from 'react-native-vector-icons/FontAwesome';
-import api from '../../controllers/api-controller'
+import apiController from '../../controllers/api-controller';
 import moment from 'moment'
 
 export default class ItemProduction extends React.Component {
@@ -11,10 +11,11 @@ export default class ItemProduction extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            title: props.navigation.state.params.producto
+            title: props.navigation.state.params.producto,
+            pausas: []
         }
 
-        console.log(this.props)
+       this.getPausas()
     }
     static navigationOptions = ({ navigation }) => ({
         title: `${navigation.state.params.producto}`,
@@ -37,6 +38,29 @@ export default class ItemProduction extends React.Component {
             default:
                 break;
         }
+    }
+
+    getPausas= ()=>{
+       
+      
+        apiController.get('motivo?estado=true' )
+        .then((response) => response.json())
+        .then((responseJson) => {
+            this.setState({pausas: []})
+            var pausas = []
+            console.log(responseJson)
+            responseJson.forEach(pausa => {
+                pausas.push({text: pausa.descripcion, onPress: () => this.iniciarTarea(this.props.navigation.state.params.id, pausa.id,this.props.navigation.state.params)})
+            });
+            this.setState({pausas: pausas})
+        })
+        .catch((error) => {
+            console.log(error)
+
+
+        });
+ 
+       
     }
     render() {
         return (
@@ -61,7 +85,7 @@ export default class ItemProduction extends React.Component {
                 />
 
                 <Button
-                    onPress={() => this.confirmation(this.props.navigation.state.params.id)}
+                    onPress={() => this.confirmationFinalizar(this.props.navigation.state.params.id)}
                     buttonStyle={styles.buttonStyle}
                     containerStyle={styles.containerButton}
                     titleStyle={styles.textButton}
@@ -73,32 +97,53 @@ export default class ItemProduction extends React.Component {
 
     confirmation = (id) => {
 
-        const secs = this.props.navigation.state.params.tiempo_estandar;
+        Alert.alert(
+            'Seleccionar motivo de la pausa',
+            'Recuerda que al seleccionar un motivo la tarea se pausará',
+            this.state.pausas,
+            {cancelable: true},
+          );
+    }
 
-        const formatted = moment.utc(secs * 1000).format('HH:mm:ss');
+    confirmationFinalizar = (id) => {
 
         Alert.alert(
-            '¿Seguro que deseas iniciar la tarea?',
-            'Tienes ' + formatted + ' para completar la tarea desde que presionas el botón iniciar',
+            'Finalizar tarea',
+            'Recuerda que al finalizar una tarea el jefe de taller tendrá que aprobar la labor realizada',
             [
                 {
                     text: 'Cancelar',
                     onPress: () => console.log('Cancel Pressed'),
                     style: 'cancel',
                 },
-                { text: 'Iniciar', onPress: () => this.iniciarTarea(id) },
+                { text: 'Iniciar', onPress: () => this.finalizarTarea(id) },
             ],
-            { cancelable: false },
-        );
+            {cancelable: true},
+          );
     }
 
-    iniciarTarea = (asignacion) => {
+    iniciarTarea = (asignacion, motivo, item) => {
 
 
-        api.get('asignacion/iniciartarea?asignacion=' + asignacion)
+        apiController.get('asignacion/pausartarea?asignacion=' + asignacion+"&motivo="+motivo)
             .then((response) => response.json())
             .then((responseJson) => {
-                console.log(responseJson)
+                this.props.navigation.replace('Pausa', { ...item })
+            })
+            .catch((error) => {
+                console.log(error)
+
+
+            });
+    }
+
+    finalizarTarea = (asignacion) => {
+
+
+        apiController.get('asignacion/finalizartarea?asignacion=' + asignacion)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                this.props.navigation.goBack()
             })
             .catch((error) => {
                 console.log(error)
