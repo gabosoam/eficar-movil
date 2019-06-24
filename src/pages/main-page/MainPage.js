@@ -12,6 +12,9 @@ import moment from "moment";
 import { widthPercentageToDP, heightPercentageToDP } from 'react-native-responsive-screen';
 import ItemProduction from './item-production';
 import ItemPausa from './item-pausa';
+import firebase from 'react-native-firebase'
+
+
 
 
 class MainPage extends Component {
@@ -26,6 +29,8 @@ class MainPage extends Component {
     }
 
     this.getData();
+
+    firebase.messaging().subscribeToTopic('ecuador')
   }
 
   onRefresh() {

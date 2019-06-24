@@ -25,6 +25,7 @@ class LoginPage extends React.Component {
         apiController.post('login', this.state.user)
             .then((response) => response.json())
             .then((responseJson) => {
+                console.log(responseJson)
                 responseJson.user ? this.saveSession(responseJson) : Alert.alert('Error', 'Contraseña incorrecta')
             })
             .catch((error) => {
@@ -35,6 +36,7 @@ class LoginPage extends React.Component {
     }
 
     saveSession = (responseJson) => {
+        
         firebase.messaging().getToken().then(token => {
             console.log(token)
             apiController.patch('usuario/' + responseJson.user.id, { fcm: token }, responseJson.token)
@@ -49,9 +51,18 @@ class LoginPage extends React.Component {
             });
         });
 
-        console.log(responseJson)
+        console.log("sdsds",responseJson.user.persona.es_empleado)
+        console.log("sdsds",responseJson.user.persona.es_cliente)
+
+        if(responseJson.user.persona.es_emplead && !responseJson.user.persona.es_cliente){
+            this.props.navigation.navigate('Main')
+        }
+
+        if(!responseJson.user.persona.es_emplead && responseJson.user.persona.es_cliente){
+            this.props.navigation.navigate('MainClient')
+        }
         this.props.add(responseJson);
-        this.props.navigation.navigate('Main')
+   
     }
 
 
